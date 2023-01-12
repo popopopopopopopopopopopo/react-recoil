@@ -1,8 +1,10 @@
-import { useState} from "react";
 import { useRecoilValue, useRecoilState } from 'recoil';
-import { todoListState } from "./TodoList.atom";
-import { todoListStatesCounter } from "./TodoList.selector";
+import { todoListState,todoListFilterState } from "./TodoList.atom";
+import { todoListStatesCounter, filteredTodoListState } from "./TodoList.selector";
 import TodoListCounter from "./TodoListCounter";
+import TodoItemCreator from "./TodoItemCreator";
+import TodoItem from "./TodoItem";
+import TodoListFilter from "./TodoListFilter";
 
 let id = 1;
 const _getId = () => {
@@ -10,40 +12,24 @@ const _getId = () => {
 }
 
 function TodoList() {
-    const [title, setTitle] = useState('');
-    const [todoList, setTodoList] = useRecoilState(todoListState);
-    const totalNum = useRecoilValue(todoListStatesCounter)
-
-    const handleChange = (e:any) => {
-        setTitle(e.target.value);
+    const todoList = useRecoilValue(filteredTodoListState);
+    const todoCounter = useRecoilValue(todoListStatesCounter)
+    const [filter, setFilter] = useRecoilState(todoListFilterState);
+    const handleChange = (e: any) => {
+        setFilter(e.target.value);
     };
 
-    const addItem = (e: any) => {
-        setTodoList((oldTodoList) => [
-            ...oldTodoList,
-            {
-                id: _getId(),
-                title: title,
-                isComplete: false,
-            },
-        ]);
-        setTitle('');
-    };
-
-    console.log(todoList);
     return (
         <>
             <h1>RecoilによるTodoアプリ</h1>
             <ul>
-                <li>Todoの登録数:{totalNum}</li>
+                <li>Todoの登録数:{todoCounter.totalNum}</li>
             </ul>
             <TodoListCounter />
-            <div style={{ margin: '1em 0' }}>
-                <input type="text" value={title} onChange={handleChange} />
-                <button onClick={addItem}>Add</button>
-            </div>
+            <TodoListFilter />
+            <TodoItemCreator />
             {todoList.map((item) => (
-                <div key={item.id}>{item.title}</div>
+                <TodoItem key={item.id} item={item} />
             ))}
         </>
     );
